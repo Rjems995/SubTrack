@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SubTrack - Track Your Subscriptions</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#090d16',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    },
+                    screens: {
+                        'xs': '475px',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom Accent Scrollbars */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 99px; }
+        .dark ::-webkit-scrollbar-thumb { background: #059669; }
+        
+        .modal-transition {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        body.modal-open {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-navy-950 dark:text-slate-100 min-h-screen pb-20 lg:pb-8 transition-colors duration-200">
+
+    <div class="flex min-h-screen">
+
+        <!-- Sidebar Navigation (Desktop / Screen >= 1024px) -->
+        <aside class="hidden lg:flex flex-col w-64 bg-white dark:bg-navy-900 border-r border-slate-200/80 dark:border-slate-800 p-5 fixed inset-y-0 z-30 justify-between shadow-sm">
+            <div class="space-y-6">
+                
+                <!-- SubTrack Brand Logo & Tagline -->
+                <div class="flex items-center space-x-3 px-1 cursor-pointer" onclick="switchTab('dashboard')">
+                    <!-- Custom SVG Logo -->
+                    <svg class="w-10 h-10 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Calendar Body (Navy Blue) -->
+                        <rect x="20" y="22" width="58" height="58" rx="10" fill="#1E293B" />
+                        <rect x="25" y="14" width="8" height="14" rx="4" fill="#1E293B" />
+                        <rect x="67" y="14" width="8" height="14" rx="4" fill="#1E293B" />
+                        
+                        <!-- Calendar Lines & Checkmarks -->
+                        <rect x="30" y="34" width="10" height="10" rx="2" fill="#10B981" />
+                        <path d="M33 39L35.5 41.5L38 36.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="44" y="37" width="26" height="4" rx="2" fill="#94A3B8" />
+
+                        <rect x="30" y="48" width="10" height="10" rx="2" fill="#10B981" />
+                        <path d="M33 53L35.5 55.5L38 50.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="44" y="51" width="20" height="4" rx="2" fill="#94A3B8" />
+
+                        <rect x="30" y="62" width="10" height="10" rx="2" fill="#10B981" />
+                        <path d="M33 67L35.5 69.5L38 64.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        
+                        <!-- Recurring Dollar Sign Badge -->
+                        <circle cx="68" cy="65" r="18" fill="#1E293B" stroke="#0F172A" stroke-width="3"/>
+                        <path d="M54 65C54 57.268 60.268 51 68 51C72.5 51 76.5 53.2 79 56.5" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M82 65C82 72.732 75.732 79 68 79C63.5 79 59.5 76.8 57 73.5" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
+                        <polygon points="79,52 82,58 75,58" fill="#38BDF8"/>
+                        <polygon points="57,78 54,72 61,72" fill="#38BDF8"/>
+                        <text x="68" y="70" font-family="'Plus Jakarta Sans', sans-serif" font-weight="900" font-size="16" fill="#10B981" text-anchor="middle">$</text>
+                    </svg>
+
+                    <div>
+                        <div class="text-xl font-black tracking-tight leading-none">
+                            <span class="text-navy-800 dark:text-slate-100">Sub</span><span class="text-emerald-500">Track</span>
+                        </div>
+                        <p class="text-[10px] font-bold text-slate-400 dark:text-slate-400 mt-1 uppercase tracking-wider">Track Your Subscriptions</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="space-y-1.5 pt-4">
+                    <button onclick="switchTab('dashboard')" data-nav-target="dashboard" class="sidebar-nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-300 transition">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>Dashboard</span>
+                    </button>
+
+                    <button onclick="switchTab('subscriptions')" data-nav-target="subscriptions" class="sidebar-nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i data-lucide="receipt" class="w-4 h-4"></i>
+                        <span>Subscriptions</span>
+                    </button>
+
+                    <button onclick="switchTab('analytics')" data-nav-target="analytics" class="sidebar-nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                        <span>Analytics</span>
+                    </button>
+
+                    <button onclick="switchTab('python')" data-nav-target="python" class="sidebar-nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i data-lucide="code-2" class="w-4 h-4 text-emerald-500"></i>
+                        <span>Python API</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Sidebar Footer Controls -->
+            <div class="pt-4 border-t border-slate-200/80 dark:border-slate-800 space-y-3">
+                <button id="desktopAddBtnSidebar" class="w-full flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm transition shadow-md shadow-emerald-500/20 active:scale-95">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Add Subscription</span>
+                </button>
+
+                <div class="flex items-center justify-between px-2 pt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    <span>Dark Theme</span>
+                    <button id="darkToggleBtnDesktop" aria-label="Toggle Dark Mode" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl hover:text-emerald-500 transition">
+                        <i data-lucide="moon" id="darkIconDesktop" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 lg:pl-64 flex flex-col min-w-0">
+
+            <!-- Mobile Top Header Bar (< 1024px) -->
+            <header class="sticky top-0 z-30 bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-4 py-2.5 flex items-center justify-between lg:hidden">
+                <div class="flex items-center space-x-2.5 cursor-pointer" onclick="switchTab('dashboard')">
+                    <svg class="w-8 h-8 shrink-0" viewBox="0 0 100 100" fill="none">
+                        <rect x="20" y="22" width="58" height="58" rx="10" fill="#1E293B" />
+                        <rect x="25" y="14" width="8" height="14" rx="4" fill="#1E293B" />
+                        <rect x="67" y="14" width="8" height="14" rx="4" fill="#1E293B" />
+                        <rect x="30" y="34" width="10" height="10" rx="2" fill="#10B981" />
+                        <path d="M33 39L35.5 41.5L38 36.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <rect x="44" y="37" width="26" height="4" rx="2" fill="#94A3B8" />
+                        <rect x="30" y="48" width="10" height="10" rx="2" fill="#10B981" />
+                        <path d="M33 53L35.5 55.5L38 50.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <rect x="44" y="51" width="20" height="4" rx="2" fill="#94A3B8" />
+                        <circle cx="68" cy="65" r="18" fill="#1E293B" stroke="#0F172A" stroke-width="3"/>
+                        <text x="68" y="70" font-family="'Plus Jakarta Sans', sans-serif" font-weight="900" font-size="16" fill="#10B981" text-anchor="middle">$</text>
+                    </svg>
+                    <div>
+                        <div class="text-lg font-black tracking-tight leading-none">
+                            <span class="text-navy-800 dark:text-slate-100">Sub</span><span class="text-emerald-500">Track</span>
+                        </div>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Track Your Subscriptions</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button onclick="switchTab('python')" class="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-800">
+                        <i data-lucide="code-2" class="w-4 h-4"></i>
+                        <span>API</span>
+                    </button>
+                    <button id="darkToggleBtnMobile" aria-label="Toggle Dark Mode" class="p-2 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                        <i data-lucide="moon" id="darkIconMobile" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Scrollable Dashboard Content -->
+            <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
+
+                <!-- Mobile Header Quick View Navigation Tabs -->
+                <div class="flex lg:hidden bg-slate-200/60 dark:bg-slate-800 p-1 rounded-2xl text-xs font-bold border border-slate-200 dark:border-slate-700">
+                    <button onclick="switchTab('dashboard')" data-tab-btn="dashboard" class="mobile-top-tab flex-1 py-2 rounded-xl text-center bg-white dark:bg-navy-900 text-emerald-600 dark:text-emerald-400 shadow-sm transition">
+                        Dashboard
+                    </button>
+                    <button onclick="switchTab('subscriptions')" data-tab-btn="subscriptions" class="mobile-top-tab flex-1 py-2 rounded-xl text-center text-slate-600 dark:text-slate-400 transition">
+                        Subscriptions (<span id="mobileTabCount">0</span>)
+                    </button>
+                    <button onclick="switchTab('analytics')" data-tab-btn="analytics" class="mobile-top-tab flex-1 py-2 rounded-xl text-center text-slate-600 dark:text-slate-400 transition">
+                        Analytics
+                    </button>
+                </div>
+
+                <!-- Renewal Alert Banner -->
+                <div id="urgentRenewalBanner" class="hidden bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2.5 bg-emerald-500 text-white rounded-xl shadow-md shadow-emerald-500/20 shrink-0">
+                            <i data-lucide="bell-ring" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-navy-800 dark:text-emerald-200 text-xs sm:text-sm">Upcoming SubTrack Renewals</h2>
+                            <p id="urgentRenewalText" class="text-xs text-slate-600 dark:text-emerald-300 mt-0.5">You have active subscriptions renewing soon.</p>
+                        </div>
+                    </div>
+                    <button id="closeBannerBtn" class="text-emerald-600 dark:text-emerald-400 p-1 hover:bg-emerald-100 dark:hover:bg-slate-800 rounded-lg">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Section 1: Dashboard Overview -->
+                <section id="section-dashboard" class="tab-section block space-y-6">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+                        
+                        <!-- Monthly Expense -->
+                        <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Monthly</span>
+                                <div class="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500 rounded-xl">
+                                    <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <div id="statMonthlyTotal" class="text-xl sm:text-3xl font-black text-navy-800 dark:text-white">$0.00</div>
+                                <p class="text-[10px] sm:text-xs text-slate-400 mt-1">Total monthly cost</p>
+                            </div>
+                        </div>
+
+                        <!-- Yearly Expense -->
+                        <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Yearly</span>
+                                <div class="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500 rounded-xl">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <div id="statAnnualTotal" class="text-xl sm:text-3xl font-black text-navy-800 dark:text-white">$0.00</div>
+                                <p class="text-[10px] sm:text-xs text-slate-400 mt-1">Projected yearly total</p>
+                            </div>
+                        </div>
+
+                        <!-- Active Count -->
+                        <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active</span>
+                                <div class="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500 rounded-xl">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex items-baseline space-x-1">
+                                    <span id="statActiveCount" class="text-xl sm:text-3xl font-black text-navy-800 dark:text-white">0</span>
+                                    <span id="statTotalCount" class="text-[10px] sm:text-xs text-slate-400">/ 0 total</span>
+                                </div>
+                                <p class="text-[10px] sm:text-xs text-slate-400 mt-1"><span id="statPausedCount">0</span> paused/canceled</p>
+                            </div>
+                        </div>
+
+                        <!-- Next Renewal Due -->
+                        <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Next Due</span>
+                                <div class="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500 rounded-xl">
+                                    <i data-lucide="clock" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <div id="statNextSubName" class="text-sm sm:text-lg font-bold truncate text-navy-800 dark:text-white">None</div>
+                                <p id="statNextSubDetail" class="text-[10px] sm:text-xs text-slate-400 mt-1">No upcoming bills</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- Section 2: Analytics & Multi-Color Category Breakdown -->
+                <section id="section-analytics" class="tab-section block space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        
+                        <!-- Multi-Color Category Doughnut Chart -->
+                        <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm lg:col-span-5 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-sm sm:text-base font-bold text-navy-800 dark:text-white flex items-center gap-2">
+                                        <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-500"></i> Category Breakdown
+                                    </h3>
+                                    <span class="text-[10px] uppercase font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">Multi-Color</span>
+                                </div>
+                                <div class="relative h-48 sm:h-56 w-full flex items-center justify-center my-2">
+                                    <canvas id="categoryChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Custom Multi-Color Interactive Legend -->
+                            <div id="categoryLegendContainer" class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2 text-xs">
+                                <!-- Populated dynamically with specific category colors -->
+                            </div>
+                        </div>
+
+                        <!-- Monthly Spending Bar Chart -->
+                        <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm lg:col-span-7 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm sm:text-base font-bold text-navy-800 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i> Monthly Schedule Projection
+                                </h3>
+                            </div>
+                            <div class="relative h-56 sm:h-64 w-full">
+                                <canvas id="monthlyChart"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- Section 3: Subscriptions Management List -->
+                <section id="section-subscriptions" class="tab-section block space-y-4">
+                    
+                    <!-- Search & Filter Controls -->
+                    <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+                        
+                        <div class="flex items-center justify-between sm:justify-start space-x-3">
+                            <h3 class="text-base font-extrabold text-navy-800 dark:text-white">Tracked Subscriptions</h3>
+                            <span id="subBadgeCount" class="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 xs:flex xs:items-center gap-2">
+                            <!-- Search Input -->
+                            <div class="relative col-span-2 xs:w-44">
+                                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="searchInput" placeholder="Search..." class="w-full pl-8 pr-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-slate-100">
+                            </div>
+
+                            <!-- Filter Category -->
+                            <select id="categoryFilter" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-slate-100 font-medium">
+                                <option value="ALL">All Categories</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Productivity">Productivity</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Health/Fitness">Health & Fitness</option>
+                                <option value="Software/SaaS">Software / SaaS</option>
+                                <option value="Education">Education</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Other">Other</option>
+                            </select>
+
+                            <!-- Sorting Filter -->
+                            <select id="sortFilter" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-slate-100 font-medium">
+                                <option value="nextDate">Sort: Renewal Date</option>
+                                <option value="costHigh">Sort: Price (High-Low)</option>
+                                <option value="costLow">Sort: Price (Low-High)</option>
+                                <option value="name">Sort: Name</option>
+                            </select>
+
+                            <!-- Data Backup Actions -->
+                            <div class="col-span-2 xs:col-span-1 flex items-center justify-end space-x-1 border-t xs:border-t-0 xs:border-l border-slate-100 dark:border-slate-800 pt-2 xs:pt-0 xs:pl-2">
+                                <button id="exportBtn" title="Export JSON" class="p-2 text-slate-600 dark:text-slate-300 hover:text-emerald-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition text-xs flex items-center gap-1">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                </button>
+                                <label title="Import JSON" class="p-2 text-slate-600 dark:text-slate-300 hover:text-emerald-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition text-xs flex items-center gap-1 cursor-pointer">
+                                    <i data-lucide="upload" class="w-4 h-4"></i>
+                                    <input type="file" id="importInput" accept=".json" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Responsive Cards View (< 1024px) -->
+                    <div id="mobileCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:hidden gap-3.5">
+                        <!-- Populated dynamically via JavaScript -->
+                    </div>
+
+                    <!-- Desktop Data Table View (>= 1024px) -->
+                    <div class="hidden lg:block bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase text-slate-500 dark:text-slate-400 font-extrabold tracking-wider">
+                                    <th class="px-5 py-3.5">Subscription Service</th>
+                                    <th class="px-5 py-3.5">Category</th>
+                                    <th class="px-5 py-3.5">Cost & Cycle</th>
+                                    <th class="px-5 py-3.5">Next Renewal</th>
+                                    <th class="px-5 py-3.5">Payment Method</th>
+                                    <th class="px-5 py-3.5">Status</th>
+                                    <th class="px-5 py-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="desktopTbody" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs font-medium">
+                                <!-- Populated dynamically via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State View -->
+                    <div id="emptyState" class="hidden py-14 bg-white dark:bg-navy-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col items-center justify-center text-center p-6 space-y-2">
+                        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500 rounded-full">
+                            <i data-lucide="inbox" class="w-8 h-8"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-navy-800 dark:text-slate-200">No subscriptions found</h4>
+                        <p class="text-xs text-slate-400">Try adjusting your filters or click '+' to track a new service.</p>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Mobile Floating Action Button (FAB) -->
+    <button id="mobileFabBtn" aria-label="Add Subscription" class="lg:hidden fixed bottom-20 right-4 z-40 p-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-500/40 active:scale-90 transition">
+        <i data-lucide="plus" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Mobile Bottom Navigation Bar (< 1024px) -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-navy-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-6 py-2.5 flex justify-around items-center text-slate-500 dark:text-slate-400">
+        <button onclick="switchTab('dashboard')" data-bnav-target="dashboard" class="mobile-bnav-item flex flex-col items-center space-y-1 text-emerald-500 font-bold">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <span class="text-[10px]">Dashboard</span>
+        </button>
+        <button onclick="switchTab('subscriptions')" data-bnav-target="subscriptions" class="mobile-bnav-item flex flex-col items-center space-y-1">
+            <i data-lucide="receipt" class="w-5 h-5"></i>
+            <span class="text-[10px]">Subs</span>
+        </button>
+        <button onclick="switchTab('analytics')" data-bnav-target="analytics" class="mobile-bnav-item flex flex-col items-center space-y-1">
+            <i data-lucide="pie-chart" class="w-5 h-5"></i>
+            <span class="text-[10px]">Analytics</span>
+        </button>
+        <button onclick="switchTab('python')" data-bnav-target="python" class="mobile-bnav-item flex flex-col items-center space-y-1">
+            <i data-lucide="code-2" class="w-5 h-5"></i>
+            <span class="text-[10px]">Python API</span>
+        </button>
+    </nav>
+
+    <!-- SubTrack Add / Edit Subscription Modal Drawer -->
+    <div id="subModal" class="fixed inset-0 z-50 hidden bg-navy-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-navy-900 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto modal-transition">
+            
+            <div class="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mb-4 sm:hidden"></div>
+
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-emerald-50 dark:bg-emerald-950/80 text-emerald-500 rounded-xl">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    </div>
+                    <h3 id="modalTitle" class="text-base sm:text-lg font-extrabold text-navy-800 dark:text-white">Add Subscription</h3>
+                </div>
+                <button id="closeModalBtn" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="subForm" class="mt-4 space-y-3.5">
+                <input type="hidden" id="subId">
+
+                <!-- Service Name -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Service / Subscription Name *</label>
+                    <input type="text" id="subName" required placeholder="e.g. Netflix, ChatGPT, Spotify, Gym" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100">
+                </div>
+
+                <!-- Category & Billing Cycle -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                        <select id="subCategory" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100 font-medium">
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Productivity">Productivity</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Health/Fitness">Health & Fitness</option>
+                            <option value="Software/SaaS">Software / SaaS</option>
+                            <option value="Education">Education</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Billing Cycle</label>
+                        <select id="subCycle" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100 font-medium">
+                            <option value="Monthly">Monthly</option>
+                            <option value="Yearly">Yearly</option>
+                            <option value="Weekly">Weekly</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cost & Renewal Date -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Cost ($) *</label>
+                        <input type="number" step="0.01" id="subCost" required placeholder="14.99" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Next Renewal *</label>
+                        <input type="date" id="subNextDate" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100">
+                    </div>
+                </div>
+
+                <!-- Payment Method & Status -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
+                        <input type="text" id="subPayment" placeholder="e.g. Visa, PayPal" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Status</label>
+                        <select id="subStatus" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100 font-medium">
+                            <option value="Active">Active</option>
+                            <option value="Paused">Paused</option>
+                            <option value="Canceled">Canceled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Notes</label>
+                    <textarea id="subNotes" rows="2" placeholder="Account email, shared plan details..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" id="cancelModalBtn" class="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition shadow-md shadow-emerald-500/20">Save Subscription</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Python SubTrack API Modal -->
+    <div id="pythonModal" class="fixed inset-0 z-50 hidden bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white dark:bg-navy-900 rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-emerald-50 dark:bg-emerald-950/80 text-emerald-500 rounded-xl">
+                        <i data-lucide="code-2" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-sm sm:text-base font-extrabold text-navy-800 dark:text-white">SubTrack Python API Backend</h3>
+                </div>
+                <button id="closePythonModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-3 overflow-y-auto text-xs">
+                <div class="flex space-x-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+                    <button id="btnSelectFastAPI" onclick="selectFramework('fastapi')" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white font-bold">FastAPI + SQLite</button>
+                    <button id="btnSelectFlask" onclick="selectFramework('flask')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">Flask + SQLAlchemy</button>
+                </div>
+
+                <p class="text-slate-600 dark:text-slate-300">
+                    Connect SubTrack with a lightweight Python service to sync subscriptions to a persistent SQLite database:
+                </p>
+
+                <div class="relative bg-navy-950 text-emerald-400 rounded-2xl p-4 font-mono text-[11px] overflow-x-auto border border-slate-800 max-h-64">
+                    <button id="copyPythonCodeBtn" class="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-emerald-300 px-2.5 py-1 rounded-lg text-[10px] flex items-center gap-1 transition">
+                        <i data-lucide="copy" class="w-3 h-3"></i> Copy Code
+                    </button>
+                    <pre><code id="pythonCodeSnippet"># SubTrack FastAPI Backend
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import sqlite3
+
+app = FastAPI(title="SubTrack API")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+def get_db():
+    conn = sqlite3.connect("subtrack.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+@app.get("/api/subscriptions")
+def get_subtrack_list():
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM subscriptions").fetchall()
+    return [dict(r) for r in rows]
+
+# Run command: uvicorn main:app --reload</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Multi-Color Category Mapping
+        const CATEGORY_COLORS = {
+            'Entertainment': {
+                hex: '#8b5cf6', // Violet
+                bgLight: 'bg-purple-100 text-purple-800 border-purple-200',
+                bgDark: 'dark:bg-purple-950/80 dark:text-purple-300 dark:border-purple-800'
+            },
+            'Productivity': {
+                hex: '#3b82f6', // Indigo
+                bgLight: 'bg-blue-100 text-blue-800 border-blue-200',
+                bgDark: 'dark:bg-blue-950/80 dark:text-blue-300 dark:border-blue-800'
+            },
+            'Utilities': {
+                hex: '#f59e0b', // Amber
+                bgLight: 'bg-amber-100 text-amber-800 border-amber-200',
+                bgDark: 'dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800'
+            },
+            'Health/Fitness': {
+                hex: '#10b981', // SubTrack Emerald
+                bgLight: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                bgDark: 'dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800'
+            },
+            'Software/SaaS': {
+                hex: '#06b6d4', // Cyan
+                bgLight: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+                bgDark: 'dark:bg-cyan-950/80 dark:text-cyan-300 dark:border-cyan-800'
+            },
+            'Education': {
+                hex: '#14b8a6', // Teal
+                bgLight: 'bg-teal-100 text-teal-800 border-teal-200',
+                bgDark: 'dark:bg-teal-950/80 dark:text-teal-300 dark:border-teal-800'
+            },
+            'Shopping': {
+                hex: '#ec4899', // Pink
+                bgLight: 'bg-pink-100 text-pink-800 border-pink-200',
+                bgDark: 'dark:bg-pink-950/80 dark:text-pink-300 dark:border-pink-800'
+            },
+            'Other': {
+                hex: '#64748b', // Slate
+                bgLight: 'bg-slate-100 text-slate-800 border-slate-200',
+                bgDark: 'dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+            }
+        };
+
+        // Preset SubTrack Subscriptions
+        const SAMPLE_SUBSCRIPTIONS = [
+            {
+                id: "sub-1",
+                name: "Netflix Premium",
+                category: "Entertainment",
+                cycle: "Monthly",
+                cost: 19.99,
+                nextDate: getRelativeDate(3),
+                paymentMethod: "Visa ...4242",
+                status: "Active",
+                notes: "4K UHD Family Account"
+            },
+            {
+                id: "sub-2",
+                name: "ChatGPT Plus",
+                category: "Productivity",
+                cycle: "Monthly",
+                cost: 20.00,
+                nextDate: getRelativeDate(11),
+                paymentMethod: "Mastercard",
+                status: "Active",
+                notes: "AI Assistant"
+            },
+            {
+                id: "sub-3",
+                name: "Spotify Duo",
+                category: "Entertainment",
+                cycle: "Monthly",
+                cost: 14.99,
+                nextDate: getRelativeDate(1),
+                paymentMethod: "PayPal",
+                status: "Active",
+                notes: "Music streaming"
+            },
+            {
+                id: "sub-4",
+                name: "GitHub Copilot",
+                category: "Software/SaaS",
+                cycle: "Yearly",
+                cost: 100.00,
+                nextDate: getRelativeDate(42),
+                paymentMethod: "Visa",
+                status: "Active",
+                notes: "AI Code completion"
+            },
+            {
+                id: "sub-5",
+                name: "Gym Membership",
+                category: "Health/Fitness",
+                cycle: "Monthly",
+                cost: 45.00,
+                nextDate: getRelativeDate(16),
+                paymentMethod: "Debit Card",
+                status: "Paused",
+                notes: "Fitness club access"
+            },
+            {
+                id: "sub-6",
+                name: "iCloud Storage",
+                category: "Utilities",
+                cycle: "Monthly",
+                cost: 2.99,
+                nextDate: getRelativeDate(22),
+                paymentMethod: "Apple Pay",
+                status: "Active",
+                notes: "200GB Backup"
+            }
+        ];
+
+        function getRelativeDate(daysFromNow) {
+            const d = new Date();
+            d.setDate(d.getDate() + daysFromNow);
+            return d.toISOString().split('T')[0];
+        }
+
+        let subscriptions = [];
+        let categoryChartInstance = null;
+        let monthlyChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            initCharts();
+            renderApp();
+            setupEvents();
+            switchTab('dashboard'); // Explicit default navigation call
+            lucide.createIcons();
+        });
+
+        function loadData() {
+            const stored = localStorage.getItem('subtrack_data');
+            if (stored) {
+                try {
+                    subscriptions = JSON.parse(stored);
+                } catch (e) {
+                    subscriptions = JSON.parse(JSON.stringify(SAMPLE_SUBSCRIPTIONS));
+                }
+            } else {
+                subscriptions = JSON.parse(JSON.stringify(SAMPLE_SUBSCRIPTIONS));
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('subtrack_data', JSON.stringify(subscriptions));
+        }
+
+        function showToast(msg) {
+            let toast = document.getElementById('toastNotification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toastNotification';
+                toast.className = 'fixed bottom-5 right-5 z-50 bg-navy-800 dark:bg-emerald-950 text-white dark:text-emerald-200 px-4 py-2.5 rounded-xl shadow-xl border border-emerald-500/30 text-xs font-bold transition-all duration-300 transform translate-y-10 opacity-0';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.classList.remove('translate-y-10', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+            }, 3000);
+        }
+
+        function getMonthlyCost(sub) {
+            if (sub.status !== 'Active') return 0;
+            const cost = parseFloat(sub.cost) || 0;
+            if (sub.cycle === 'Yearly') return cost / 12;
+            if (sub.cycle === 'Weekly') return cost * 4.333;
+            return cost;
+        }
+
+        function initCharts() {
+            const ctxCat = document.getElementById('categoryChart')?.getContext('2d');
+            if (ctxCat) {
+                categoryChartInstance = new Chart(ctxCat, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: [],
+                            borderWidth: 2,
+                            borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` ${context.label}: $${context.raw.toFixed(2)}/mo`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+
+            const ctxMonth = document.getElementById('monthlyChart')?.getContext('2d');
+            if (ctxMonth) {
+                monthlyChartInstance = new Chart(ctxMonth, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Monthly Cost ($)',
+                            data: [0, 0, 0, 0, 0, 0],
+                            backgroundColor: '#10b981',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                                ticks: {
+                                    callback: function(val) { return '$' + val; }
+                                }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateCharts() {
+            if (!categoryChartInstance && !monthlyChartInstance) return;
+
+            const catMap = {};
+            let totalMonthly = 0;
+
+            subscriptions.forEach(sub => {
+                const mCost = getMonthlyCost(sub);
+                if (mCost > 0) {
+                    const cat = sub.category || 'Other';
+                    catMap[cat] = (catMap[cat] || 0) + mCost;
+                    totalMonthly += mCost;
+                }
+            });
+
+            const categories = Object.keys(catMap);
+            const amounts = categories.map(c => catMap[c]);
+            const colors = categories.map(c => (CATEGORY_COLORS[c] ? CATEGORY_COLORS[c].hex : '#64748b'));
+
+            if (categoryChartInstance) {
+                categoryChartInstance.data.labels = categories;
+                categoryChartInstance.data.datasets[0].data = amounts;
+                categoryChartInstance.data.datasets[0].backgroundColor = colors;
+                categoryChartInstance.update();
+            }
+
+            const legendContainer = document.getElementById('categoryLegendContainer');
+            if (legendContainer) {
+                if (categories.length === 0) {
+                    legendContainer.innerHTML = `<span class="col-span-2 text-slate-400 text-center py-2">No active subscriptions</span>`;
+                } else {
+                    legendContainer.innerHTML = categories.map(cat => {
+                        const amt = catMap[cat];
+                        const pct = totalMonthly > 0 ? ((amt / totalMonthly) * 100).toFixed(0) : 0;
+                        const hex = CATEGORY_COLORS[cat] ? CATEGORY_COLORS[cat].hex : '#64748b';
+                        return `
+                            <div class="flex items-center justify-between p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                <div class="flex items-center space-x-2 truncate">
+                                    <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${hex}"></span>
+                                    <span class="font-medium text-slate-700 dark:text-slate-300 truncate">${escapeHtml(cat)}</span>
+                                </div>
+                                <div class="font-bold text-right shrink-0 ml-2">
+                                    <span>$${amt.toFixed(2)}</span>
+                                    <span class="text-[10px] text-slate-400 ml-1">(${pct}%)</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            if (monthlyChartInstance) {
+                const monthNames = [];
+                const monthTotals = [];
+                const now = new Date();
+
+                for (let i = 0; i < 6; i++) {
+                    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+                    monthNames.push(d.toLocaleString('default', { month: 'short' }));
+                    monthTotals.push(totalMonthly);
+                }
+
+                monthlyChartInstance.data.labels = monthNames;
+                monthlyChartInstance.data.datasets[0].data = monthTotals;
+                monthlyChartInstance.update();
+            }
+        }
+
+        function renderApp() {
+            let monthlyTotal = 0;
+            let activeCount = 0;
+            let pausedCount = 0;
+            let nextRenewalSub = null;
+
+            const today = new Date().toISOString().split('T')[0];
+
+            subscriptions.forEach(sub => {
+                if (sub.status === 'Active') {
+                    activeCount++;
+                    monthlyTotal += getMonthlyCost(sub);
+
+                    if (sub.nextDate) {
+                        if (!nextRenewalSub || sub.nextDate < nextRenewalSub.nextDate) {
+                            nextRenewalSub = sub;
+                        }
+                    }
+                } else {
+                    pausedCount++;
+                }
+            });
+
+            const statMonthly = document.getElementById('statMonthlyTotal');
+            if (statMonthly) statMonthly.textContent = `$${monthlyTotal.toFixed(2)}`;
+
+            const statAnnual = document.getElementById('statAnnualTotal');
+            if (statAnnual) statAnnual.textContent = `$${(monthlyTotal * 12).toFixed(2)}`;
+
+            const statActive = document.getElementById('statActiveCount');
+            if (statActive) statActive.textContent = activeCount;
+
+            const statTotal = document.getElementById('statTotalCount');
+            if (statTotal) statTotal.textContent = `/ ${subscriptions.length} total`;
+
+            const statPaused = document.getElementById('statPausedCount');
+            if (statPaused) statPaused.textContent = pausedCount;
+
+            const statNextName = document.getElementById('statNextSubName');
+            const statNextDetail = document.getElementById('statNextSubDetail');
+            if (statNextName && statNextDetail) {
+                if (nextRenewalSub) {
+                    statNextName.textContent = nextRenewalSub.name;
+                    statNextDetail.textContent = `$${parseFloat(nextRenewalSub.cost).toFixed(2)} on ${nextRenewalSub.nextDate}`;
+                } else {
+                    statNextName.textContent = 'None';
+                    statNextDetail.textContent = 'No upcoming bills';
+                }
+            }
+
+            const urgentBanner = document.getElementById('urgentRenewalBanner');
+            const urgentText = document.getElementById('urgentRenewalText');
+            if (urgentBanner && urgentText) {
+                const urgentSubs = subscriptions.filter(s => {
+                    if (s.status !== 'Active' || !s.nextDate) return false;
+                    const diffDays = Math.ceil((new Date(s.nextDate) - new Date(today)) / (1000 * 60 * 60 * 24));
+                    return diffDays >= 0 && diffDays <= 3;
+                });
+
+                if (urgentSubs.length > 0) {
+                    urgentBanner.classList.remove('hidden');
+                    urgentText.textContent = `${urgentSubs.map(s => s.name).join(', ')} renewing within the next 3 days!`;
+                } else {
+                    urgentBanner.classList.add('hidden');
+                }
+            }
+
+            const mobileCount = document.getElementById('mobileTabCount');
+            if (mobileCount) mobileCount.textContent = subscriptions.length;
+            const badgeCount = document.getElementById('subBadgeCount');
+            if (badgeCount) badgeCount.textContent = subscriptions.length;
+
+            const searchVal = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const catVal = document.getElementById('categoryFilter')?.value || 'ALL';
+            const sortVal = document.getElementById('sortFilter')?.value || 'nextDate';
+
+            let filtered = subscriptions.filter(sub => {
+                const matchesSearch = sub.name.toLowerCase().includes(searchVal) || (sub.notes && sub.notes.toLowerCase().includes(searchVal));
+                const matchesCat = catVal === 'ALL' || sub.category === catVal;
+                return matchesSearch && matchesCat;
+            });
+
+            filtered.sort((a, b) => {
+                if (sortVal === 'costHigh') return b.cost - a.cost;
+                if (sortVal === 'costLow') return a.cost - b.cost;
+                if (sortVal === 'name') return a.name.localeCompare(b.name);
+                return (a.nextDate || '').localeCompare(b.nextDate || '');
+            });
+
+            const tbody = document.getElementById('desktopTbody');
+            const mobileContainer = document.getElementById('mobileCardsContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filtered.length === 0) {
+                if (tbody) tbody.innerHTML = '';
+                if (mobileContainer) mobileContainer.innerHTML = '';
+                if (emptyState) emptyState.classList.remove('hidden');
+            } else {
+                if (emptyState) emptyState.classList.add('hidden');
+
+                if (tbody) {
+                    tbody.innerHTML = filtered.map(sub => {
+                        const catStyle = CATEGORY_COLORS[sub.category] || CATEGORY_COLORS['Other'];
+                        const statusColor = sub.status === 'Active' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : (sub.status === 'Paused' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400');
+
+                        return `
+                            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                                <td class="px-5 py-3.5 font-bold text-navy-800 dark:text-slate-100">
+                                    ${escapeHtml(sub.name)}
+                                    ${sub.notes ? `<p class="text-[10px] font-normal text-slate-400 truncate max-w-xs">${escapeHtml(sub.notes)}</p>` : ''}
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${catStyle.bgLight} ${catStyle.bgDark}">
+                                        ${escapeHtml(sub.category)}
+                                    </span>
+                                </td>
+                                <td class="px-5 py-3.5 font-extrabold text-slate-800 dark:text-slate-200">
+                                    $${parseFloat(sub.cost).toFixed(2)} <span class="text-[10px] font-normal text-slate-400">/ ${sub.cycle}</span>
+                                </td>
+                                <td class="px-5 py-3.5 font-medium text-slate-600 dark:text-slate-300">
+                                    ${sub.nextDate || 'N/A'}
+                                </td>
+                                <td class="px-5 py-3.5 text-slate-500 dark:text-slate-400">
+                                    ${escapeHtml(sub.paymentMethod || '—')}
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <button onclick="toggleSubStatus('${sub.id}')" title="Click to toggle status" class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusColor} hover:opacity-80 transition">
+                                        ${sub.status}
+                                    </button>
+                                </td>
+                                <td class="px-5 py-3.5 text-right space-x-1">
+                                    <button onclick="openEditModal('${sub.id}')" class="p-1.5 text-slate-400 hover:text-emerald-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="deleteSubscription('${sub.id}')" class="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                if (mobileContainer) {
+                    mobileContainer.innerHTML = filtered.map(sub => {
+                        const catStyle = CATEGORY_COLORS[sub.category] || CATEGORY_COLORS['Other'];
+                        const statusColor = sub.status === 'Active' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : (sub.status === 'Paused' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400');
+
+                        return `
+                            <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h4 class="font-extrabold text-sm text-navy-800 dark:text-white">${escapeHtml(sub.name)}</h4>
+                                        <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${catStyle.bgLight} ${catStyle.bgDark}">
+                                            ${escapeHtml(sub.category)}
+                                        </span>
+                                    </div>
+                                    <button onclick="toggleSubStatus('${sub.id}')" class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusColor}">
+                                        ${sub.status}
+                                    </button>
+                                </div>
+
+                                <div class="flex items-baseline justify-between pt-1 border-t border-slate-100 dark:border-slate-800">
+                                    <div>
+                                        <span class="text-xs text-slate-400">Cost: </span>
+                                        <span class="text-sm font-black text-slate-800 dark:text-slate-100">$${parseFloat(sub.cost).toFixed(2)}</span>
+                                        <span class="text-[10px] text-slate-400">/${sub.cycle}</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[10px] text-slate-400">Next due: </span>
+                                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${sub.nextDate || 'N/A'}</span>
+                                    </div>
+                                </div>
+
+                                ${sub.notes ? `<p class="text-[11px] text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl">${escapeHtml(sub.notes)}</p>` : ''}
+
+                                <div class="flex items-center justify-end space-x-2 pt-1">
+                                    <button onclick="openEditModal('${sub.id}')" class="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center gap-1">
+                                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit
+                                    </button>
+                                    <button onclick="deleteSubscription('${sub.id}')" class="px-3 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 rounded-xl flex items-center gap-1">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            updateCharts();
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function switchTab(tabName) {
+            if (tabName === 'python') {
+                openPythonModal();
+                return;
+            }
+
+            const sections = {
+                'dashboard': document.getElementById('section-dashboard'),
+                'subscriptions': document.getElementById('section-subscriptions'),
+                'analytics': document.getElementById('section-analytics')
+            };
+
+            const isMobile = window.innerWidth < 1024;
+
+            Object.keys(sections).forEach(key => {
+                const section = sections[key];
+                if (!section) return;
+
+                if (isMobile) {
+                    if (key === tabName) {
+                        section.classList.remove('hidden');
+                        section.classList.add('block');
+                    } else {
+                        section.classList.add('hidden');
+                        section.classList.remove('block');
+                    }
+                } else {
+                    section.classList.remove('hidden');
+                    section.classList.add('block');
+                }
+            });
+
+            const sidebarBtns = document.querySelectorAll('.sidebar-nav-item');
+            sidebarBtns.forEach(btn => {
+                const target = btn.getAttribute('data-nav-target');
+                if (target === tabName) {
+                    btn.className = "sidebar-nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-300 transition";
+                } else {
+                    btn.className = "sidebar-nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition";
+                }
+            });
+
+            const mobileTopBtns = document.querySelectorAll('.mobile-top-tab');
+            mobileTopBtns.forEach(btn => {
+                const target = btn.getAttribute('data-tab-btn');
+                if (target === tabName) {
+                    btn.className = "mobile-top-tab flex-1 py-2 rounded-xl text-center bg-white dark:bg-navy-900 text-emerald-600 dark:text-emerald-400 shadow-sm transition font-bold";
+                } else {
+                    btn.className = "mobile-top-tab flex-1 py-2 rounded-xl text-center text-slate-600 dark:text-slate-400 transition font-normal";
+                }
+            });
+
+            const mobileBnavBtns = document.querySelectorAll('.mobile-bnav-item');
+            mobileBnavBtns.forEach(btn => {
+                const target = btn.getAttribute('data-bnav-target');
+                if (target === tabName) {
+                    btn.className = "mobile-bnav-item flex flex-col items-center space-y-1 text-emerald-500 font-bold";
+                } else {
+                    btn.className = "mobile-bnav-item flex flex-col items-center space-y-1 text-slate-500 dark:text-slate-400";
+                }
+            });
+
+            if (!isMobile && sections[tabName]) {
+                sections[tabName].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            if (tabName === 'analytics' || !isMobile) {
+                setTimeout(() => updateCharts(), 50);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const isMobile = window.innerWidth < 1024;
+            const sections = ['section-dashboard', 'section-subscriptions', 'section-analytics'];
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (!isMobile) {
+                        el.classList.remove('hidden');
+                        el.classList.add('block');
+                    }
+                }
+            });
+        });
+
+        function setupEvents() {
+            const toggleDark = () => document.documentElement.classList.toggle('dark');
+            document.getElementById('darkToggleBtnDesktop')?.addEventListener('click', toggleDark);
+            document.getElementById('darkToggleBtnMobile')?.addEventListener('click', toggleDark);
+
+            document.getElementById('searchInput')?.addEventListener('input', renderApp);
+            document.getElementById('categoryFilter')?.addEventListener('change', renderApp);
+            document.getElementById('sortFilter')?.addEventListener('change', renderApp);
+
+            document.getElementById('closeBannerBtn')?.addEventListener('click', () => {
+                document.getElementById('urgentRenewalBanner')?.classList.add('hidden');
+            });
+
+            document.getElementById('desktopAddBtnSidebar')?.addEventListener('click', openAddModal);
+            document.getElementById('mobileFabBtn')?.addEventListener('click', openAddModal);
+            document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
+            document.getElementById('cancelModalBtn')?.addEventListener('click', closeModal);
+
+            document.getElementById('subForm')?.addEventListener('submit', handleFormSubmit);
+
+            document.getElementById('exportBtn')?.addEventListener('click', exportData);
+            document.getElementById('importInput')?.addEventListener('change', importData);
+
+            document.getElementById('closePythonModalBtn')?.addEventListener('click', closePythonModal);
+
+            document.getElementById('copyPythonCodeBtn')?.addEventListener('click', () => {
+                const code = document.getElementById('pythonCodeSnippet').innerText;
+                const tempArea = document.createElement('textarea');
+                tempArea.value = code;
+                document.body.appendChild(tempArea);
+                tempArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempArea);
+                showToast('SubTrack Python Backend Code Copied!');
+            });
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Add Subscription';
+            document.getElementById('subForm').reset();
+            document.getElementById('subId').value = '';
+            document.getElementById('subNextDate').value = getRelativeDate(30);
+            document.getElementById('subModal').classList.remove('hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        function openEditModal(id) {
+            const sub = subscriptions.find(s => s.id === id);
+            if (!sub) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Subscription';
+            document.getElementById('subId').value = sub.id;
+            document.getElementById('subName').value = sub.name;
+            document.getElementById('subCategory').value = sub.category;
+            document.getElementById('subCycle').value = sub.cycle;
+            document.getElementById('subCost').value = sub.cost;
+            document.getElementById('subNextDate').value = sub.nextDate;
+            document.getElementById('subPayment').value = sub.paymentMethod || '';
+            document.getElementById('subStatus').value = sub.status;
+            document.getElementById('subNotes').value = sub.notes || '';
+
+            document.getElementById('subModal').classList.remove('hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeModal() {
+            document.getElementById('subModal').classList.add('hidden');
+            document.body.classList.remove('modal-open');
+        }
+
+        function openPythonModal() {
+            document.getElementById('pythonModal').classList.remove('hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        function closePythonModal() {
+            document.getElementById('pythonModal').classList.add('hidden');
+            document.body.classList.remove('modal-open');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('subId').value;
+            const newSub = {
+                id: id || 'sub-' + Date.now(),
+                name: document.getElementById('subName').value,
+                category: document.getElementById('subCategory').value,
+                cycle: document.getElementById('subCycle').value,
+                cost: parseFloat(document.getElementById('subCost').value),
+                nextDate: document.getElementById('subNextDate').value,
+                paymentMethod: document.getElementById('subPayment').value,
+                status: document.getElementById('subStatus').value,
+                notes: document.getElementById('subNotes').value
+            };
+
+            if (id) {
+                const idx = subscriptions.findIndex(s => s.id === id);
+                if (idx !== -1) subscriptions[idx] = newSub;
+            } else {
+                subscriptions.push(newSub);
+            }
+
+            saveData();
+            renderApp();
+            closeModal();
+            showToast(id ? 'Subscription updated successfully!' : 'New subscription added!');
+        }
+
+        function toggleSubStatus(id) {
+            const sub = subscriptions.find(s => s.id === id);
+            if (sub) {
+                if (sub.status === 'Active') sub.status = 'Paused';
+                else if (sub.status === 'Paused') sub.status = 'Canceled';
+                else sub.status = 'Active';
+
+                saveData();
+                renderApp();
+                showToast(`Status changed to ${sub.status}`);
+            }
+        }
+
+        function deleteSubscription(id) {
+            subscriptions = subscriptions.filter(s => s.id !== id);
+            saveData();
+            renderApp();
+            showToast('Subscription deleted');
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(subscriptions, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `subtrack_backup.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast('JSON backup exported!');
+        }
+
+        function importData(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const parsed = JSON.parse(event.target.result);
+                    if (Array.isArray(parsed)) {
+                        subscriptions = parsed;
+                        saveData();
+                        renderApp();
+                        showToast('Subscriptions imported successfully!');
+                    }
+                } catch(err) {
+                    showToast('Invalid JSON file format.');
+                }
+            };
+            if (e.target.files[0]) reader.readAsText(e.target.files[0]);
+        }
+
+        function selectFramework(fw) {
+            const codeEl = document.getElementById('pythonCodeSnippet');
+            const btnFastAPI = document.getElementById('btnSelectFastAPI');
+            const btnFlask = document.getElementById('btnSelectFlask');
+
+            if (fw === 'fastapi') {
+                btnFastAPI.className = "px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white font-bold";
+                btnFlask.className = "px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold";
+                codeEl.innerText = `# SubTrack FastAPI Backend
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import sqlite3
+
+app = FastAPI(title="SubTrack API")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+def get_db():
+    conn = sqlite3.connect("subtrack.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+@app.get("/api/subscriptions")
+def get_subtrack_list():
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM subscriptions").fetchall()
+    return [dict(r) for r in rows]
+
+# Run command: uvicorn main:app --reload`;
+            } else {
+                btnFlask.className = "px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white font-bold";
+                btnFastAPI.className = "px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold";
+                codeEl.innerText = `# SubTrack Flask Backend
+from flask import Flask, jsonify
+from flask_cors import CORS
+import sqlite3
+
+app = Flask("SubTrack")
+CORS(app)
+
+def get_db():
+    conn = sqlite3.connect("subtrack.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+@app.route("/api/subscriptions", methods=["GET"])
+def get_subtrack_list():
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM subscriptions").fetchall()
+    return jsonify([dict(r) for r in rows])
+
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)`;
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
