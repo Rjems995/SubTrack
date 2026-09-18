@@ -144,6 +144,12 @@
             <!-- Sidebar Footer Controls -->
             <div class="pt-4 border-t border-slate-200/80 dark:border-slate-800 space-y-3">
                 
+                <!-- Database Engine Status Indicator -->
+                <div class="flex items-center justify-between px-2 text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-xl border border-slate-200/60 dark:border-slate-700/50">
+                    <span class="flex items-center gap-1.5"><i data-lucide="database" class="w-3.5 h-3.5 text-emerald-500"></i> Local DB</span>
+                    <span id="dbEngineBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">IndexedDB</span>
+                </div>
+
                 <!-- Currency Selector -->
                 <div class="flex items-center justify-between px-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                     <span class="flex items-center gap-1"><i data-lucide="coins" class="w-3.5 h-3.5"></i> Currency</span>
@@ -826,8 +832,70 @@ def get_subtrack_list():
         let monthlyChartInstance = null;
         let calendarDate = new Date();
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
+        // IndexedDB Local Database Engine Integration
+        const DB_NAME = 'SubTrackDatabase';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'subscriptions';
+        let dbInstance = null;
+
+        function initIndexedDB() {
+            return new Promise((resolve) => {
+                if (!window.indexedDB) {
+                    console.warn('IndexedDB not supported, using localStorage');
+                    resolve(null);
+                    return;
+                }
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = (event) => {
+                    console.error('Database error:', event);
+                    resolve(null);
+                };
+                request.onsuccess = (event) => {
+                    dbInstance = event.target.result;
+                    resolve(dbInstance);
+                };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        store.createIndex('category', 'category', { unique: false });
+                        store.createIndex('status', 'status', { unique: false });
+                        store.createIndex('nextDate', 'nextDate', { unique: false });
+                    }
+                };
+            });
+        }
+
+        async function loadDataFromIndexedDB() {
+            if (!dbInstance) return null;
+            return new Promise((resolve) => {
+                try {
+                    const transaction = dbInstance.transaction([STORE_NAME], 'readonly');
+                    const store = transaction.objectStore(STORE_NAME);
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => resolve(null);
+                } catch (e) {
+                    resolve(null);
+                }
+            });
+        }
+
+        async function saveToIndexedDB(items) {
+            if (!dbInstance) return;
+            try {
+                const transaction = dbInstance.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.clear();
+                items.forEach(item => store.put(item));
+            } catch (e) {
+                console.error('Failed writing to IndexedDB:', e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initIndexedDB();
+            await loadData();
             initCharts();
             renderApp();
             setupEvents();
@@ -835,8 +903,7 @@ def get_subtrack_list():
             lucide.createIcons();
         });
 
-        function loadData() {
-            const stored = localStorage.getItem('subtrack_data');
+        async function loadData() {
             const storedCurrency = localStorage.getItem('subtrack_currency');
             if (storedCurrency && CURRENCIES[storedCurrency]) {
                 currentCurrency = storedCurrency;
@@ -846,20 +913,28 @@ def get_subtrack_list():
                 if (selMobile) selMobile.value = currentCurrency;
             }
 
-            if (stored) {
-                try {
-                    subscriptions = JSON.parse(stored);
-                } catch (e) {
+            const dbData = await loadDataFromIndexedDB();
+            if (dbData && dbData.length > 0) {
+                subscriptions = dbData;
+            } else {
+                const stored = localStorage.getItem('subtrack_data');
+                if (stored) {
+                    try {
+                        subscriptions = JSON.parse(stored);
+                    } catch (e) {
+                        subscriptions = JSON.parse(JSON.stringify(SAMPLE_SUBSCRIPTIONS));
+                    }
+                } else {
                     subscriptions = JSON.parse(JSON.stringify(SAMPLE_SUBSCRIPTIONS));
                 }
-            } else {
-                subscriptions = JSON.parse(JSON.stringify(SAMPLE_SUBSCRIPTIONS));
+                saveToIndexedDB(subscriptions);
             }
         }
 
         function saveData() {
             localStorage.setItem('subtrack_data', JSON.stringify(subscriptions));
             localStorage.setItem('subtrack_currency', currentCurrency);
+            saveToIndexedDB(subscriptions);
         }
 
         function showToast(msg) {
