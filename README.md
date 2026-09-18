@@ -1,98 +1,20 @@
-SubTrack - Subscription Manager
-
-SubTrack ("Track Your Subscriptions") is a clean, modern, and responsive web application designed to help you organize, monitor, and optimize your monthly and annual recurring expenses.
-
-Features
-
-Mobile-First & Fully Responsive: Optimized for smartphones, tablets, and desktop devices with touch-friendly navigation, mobile drawers, and floating action buttons (FAB).
-
-Interactive Analytics & Spending Insights: Visual breakdown of your expenses powered by Chart.js, featuring:
-
-Multi-color Category Breakdown Doughnut Chart.
-
-Monthly Schedule Projection Bar Chart.
-
-Multi-Color Category Tagging: Instant visual distinction across Entertainment, Productivity, Utilities, Health & Fitness, SaaS, Education, Shopping, and Custom categories.
-
-Renewal Alerts & Urgency Notifications: Banner reminders for active subscriptions renewing within 3 days.
-
-Dark / Light Mode: Seamless theme toggling tailored for daytime viewing or dark interface preferences.
-
-Data Privacy & Storage: Works out-of-the-box locally in your browser using localStorage.
-
-Import & Export: Backup and restore your subscription data at any time via JSON files.
-
-Python FastAPI + SQLite Backend: Optional lightweight REST API backend to sync and persist your data to a SQLite database.
-
-Project Structure
-
-subtrack/
-├── index.html               # Single-file Frontend App (HTML5 + Tailwind CSS + JS)
-├── main.py                  # Python REST API Backend (FastAPI + SQLite)
-├── github_upload_guide.md   # Deployment Guide for GitHub Pages
-└── README.md                # Project Documentation
-
-
-Quick Start
-
-Option 1: Running the Frontend (No Backend Required)
-
-Since index.html is fully self-contained, you can run the application directly in any modern web browser:
-
-Double-click index.html or drag and drop it into your favorite browser.
-
-Start adding and tracking your subscriptions right away! Data will be saved locally in your browser.
-
-Option 2: Running with the Python Backend (FastAPI + SQLite)
-
-To use SubTrack with a persistent SQLite database service on your machine:
-
-Prerequisites
-
-Python 3.8 or higher installed on your computer.
-
-Steps
-
-Install required dependencies:
-
-pip install fastapi uvicorn pydantic
-
-
-Start the FastAPI server:
-
-uvicorn main:app --reload
-
-
-Access the API:
-
-The server will start at http://127.0.0.1:8000.
-
-View interactive Swagger API documentation at http://127.0.0.1:8000/docs.
-
-Deploying to GitHub Pages (Free Hosting)
-
-You can host SubTrack live on the web for free using GitHub Pages:
-
-Create a new public repository on GitHub.
-
-Upload index.html to the repository.
-
-Go to Settings > Pages.
-
-Set the source branch to main (or master) and save.
-
-GitHub will generate your live URL (e.g., https://yourusername.github.io/repository-name/).
-
-(For detailed step-by-step instructions, see github_upload_guide.md).
-
-Built With
-
-Frontend: HTML5, Tailwind CSS, Vanilla JavaScript (ES6+)
-
-Charts & Graphics: Chart.js, Lucide Icons
-
-Backend (Optional): Python 3, FastAPI, SQLite3, Uvicorn
-
-License
-
-This project is open source and available under the MIT License.
+SubTrack - Subscription ManagerSubTrack ("Track Your Subscriptions") is an open-source, mobile-first web application designed to help individuals and teams organize, monitor, and optimize recurring expenses, streaming services, software plans, and trial subscriptions.FeaturesClient & User InterfaceMobile-First Responsive Architecture: Adapted for smartphones, tablets, and desktop displays with touch-friendly navigation drawers, bottom tab bar, and quick-action Floating Action Button (FAB).IndexedDB Local Database: Embedded browser database engine (SubTrackDatabase) with transactional storage, custom indexes, and automatic fallback to localStorage.Interactive Monthly Calendar: Visual month-by-month calendar grid displaying upcoming renewal dates, color-coded by subscription category.Multi-Color Analytics & Visualizations: Powered by Chart.js with dynamic Category Doughnut breakdown and 6-month projected spending bar graphs.Multi-Currency Support: Real-time currency switching supporting USD ($), EUR (€), GBP (£), JPY (¥), PHP (₱), CAD (CA$), and AUD (A$).Free Trial Tracking: Dedicated trial toggles, countdown indicators, and banner warnings for temporary trial cancellations.Urgent Renewal Alerts: Automatic banner notification triggering 1 to 3 days prior to payment due dates.Theme Switching: Dark and Light UI themes.Data Backup & Migration: One-click JSON export and import capabilities.Backend, Testing & DevOpsPython REST API: Optional backend built with FastAPI and SQLite3 (main.py) providing CRUD endpoints for persistent database storage.Automated CI/CD: Pre-configured GitHub Actions workflow (.github/workflows/deploy.yml) for automatic deployment to GitHub Pages.Automated Test Suite: Integrated unit testing using PyTest (tests/test_main.py).Docker Container Support: Containerized environment via Dockerfile for standardized execution across any cloud host or container orchestration system.Repository Structuresubtrack/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml          # GitHub Actions Pages Auto-Deployment
+├── tests/
+│   └── test_main.py            # PyTest Backend Test Suite
+├── .gitignore                  # Git Exclusion Rules
+├── CONTRIBUTING.md             # Contribution Guidelines
+├── Dockerfile                  # Docker Container Configuration
+├── index.html                  # Single-File Frontend App
+├── LICENSE                     # MIT Open Source License
+├── main.py                     # Python REST API Backend (FastAPI + SQLite)
+├── README.md                   # Project Documentation
+└── requirements.txt            # Python Package Dependencies
+Quick Start GuideOption 1: Standalone Frontend (No Backend Required)Since index.html is self-contained with client-side IndexedDB storage, you can run the app directly in any modern browser:Clone or download this repository.Open index.html in your browser.Manage, add, and analyze your subscriptions immediately.Option 2: Running with Python FastAPI + SQLite BackendTo persist data to a local SQLite database (subtrack.db):Install dependencies:pip install -r requirements.txt
+Launch the FastAPI development server:uvicorn main:app --reload
+Access API Documentation:API root: http://127.0.0.1:8000Interactive OpenAPI Docs: http://127.0.0.1:8000/docsOption 3: Running via DockerBuild the Docker container image:docker build -t subtrack .
+Run the container:docker run -d -p 8000:8000 --name subtrack_app subtrack
+Open http://127.0.0.1:8000/docs in your browser.Running Automated TestsRun the PyTest test suite to verify backend endpoints:pytest
+Deploying to GitHub PagesSubTrack includes a GitHub Actions deployment workflow:Push your code to the main branch on GitHub.In your repository settings on GitHub, navigate to Settings > Pages.Under Build and deployment, set the Source to GitHub Actions.The site will automatically build and publish to your GitHub Pages URL (https://YOUR-USERNAME.github.io/subtrack/).Technologies UsedFrontend: HTML5, Tailwind CSS, JavaScript (ES6+), Chart.js, Lucide Icons, IndexedDBBackend: Python 3.11, FastAPI, Pydantic, SQLite3, UvicornDevOps & Testing: GitHub Actions, Docker, PyTest, HTTPXLicenseThis project is open-source and released under the MIT License.
