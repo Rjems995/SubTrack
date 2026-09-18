@@ -24,7 +24,7 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-# Database Initialization
+# Database Initialization with Schema and Default Seeding
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
@@ -32,15 +32,37 @@ def init_db():
         CREATE TABLE IF NOT EXISTS subscriptions (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            category TEXT,
-            cycle TEXT,
+            category TEXT DEFAULT 'Other',
+            cycle TEXT DEFAULT 'Monthly',
             cost REAL NOT NULL,
             nextDate TEXT,
             paymentMethod TEXT,
-            status TEXT,
-            notes TEXT
+            status TEXT DEFAULT 'Active',
+            isTrial INTEGER DEFAULT 0,
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # Create indexes for optimized queries
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_category ON subscriptions(category)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_status ON subscriptions(status)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_nextDate ON subscriptions(nextDate)")
+    
+    # Seed initial database entries if empty
+    cursor.execute("SELECT COUNT(*) as count FROM subscriptions")
+    if cursor.fetchone()["count"] == 0:
+        sample_data = [
+            ("sub-1", "Netflix Premium", "Entertainment", "Monthly", 19.99, "2026-10-05", "Visa ...4242", "Active", 0, "4K UHD Family Account"),
+            ("sub-2", "ChatGPT Plus", "Productivity", "Monthly", 20.00, "2026-10-12", "Mastercard", "Active", 0, "AI Assistant"),
+            ("sub-3", "Spotify Duo", "Entertainment", "Monthly", 14.99, "2026-10-02", "PayPal", "Active", 0, "Music streaming"),
+            ("sub-4", "Adobe CC Trial", "Software/SaaS", "Monthly", 54.99, "2026-10-03", "Visa", "Active", 1, "7-Day Promotional Trial"),
+            ("sub-5", "Gym Membership", "Health/Fitness", "Monthly", 45.00, "2026-10-20", "Debit Card", "Paused", 0, "Fitness club access")
+        ]
+        cursor.executemany("""
+            INSERT INTO subscriptions (id, name, category, cycle, cost, nextDate, paymentMethod, status, isTrial, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, sample_data)
+        
     conn.commit()
     conn.close()
 
@@ -57,13 +79,14 @@ class Subscription(BaseModel):
     nextDate: Optional[str] = ""
     paymentMethod: Optional[str] = ""
     status: Optional[str] = "Active"
+    isTrial: Optional[bool] = False
     notes: Optional[str] = ""
 
 # API Endpoints
 
 @app.get("/")
 def root():
-    return {"message": "SubTrack API is running!"}
+    return {"message": "SubTrack API is running with SQLite database support!"}
 
 @app.get("/api/subscriptions", response_model=List[Subscription])
 def get_all_subscriptions():
@@ -80,9 +103,9 @@ def create_subscription(sub: Subscription):
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT INTO subscriptions (id, name, category, cycle, cost, nextDate, paymentMethod, status, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (sub.id, sub.name, sub.category, sub.cycle, sub.cost, sub.nextDate, sub.paymentMethod, sub.status, sub.notes))
+            INSERT INTO subscriptions (id, name, category, cycle, cost, nextDate, paymentMethod, status, isTrial, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (sub.id, sub.name, sub.category, sub.cycle, sub.cost, sub.nextDate, sub.paymentMethod, sub.status, 1 if sub.isTrial else 0, sub.notes))
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()
@@ -97,9 +120,9 @@ def update_subscription(sub_id: str, sub: Subscription):
     cursor = conn.cursor()
     cursor.execute("""
         UPDATE subscriptions 
-        SET name = ?, category = ?, cycle = ?, cost = ?, nextDate = ?, paymentMethod = ?, status = ?, notes = ?
+        SET name = ?, category = ?, cycle = ?, cost = ?, nextDate = ?, paymentMethod = ?, status = ?, isTrial = ?, notes = ?
         WHERE id = ?
-    """, (sub.name, sub.category, sub.cycle, sub.cost, sub.nextDate, sub.paymentMethod, sub.status, sub.notes, sub_id))
+    """, (sub.name, sub.category, sub.cycle, sub.cost, sub.nextDate, sub.paymentMethod, sub.status, 1 if sub.isTrial else 0, sub.notes, sub_id))
     
     if cursor.rowcount == 0:
         conn.close()
