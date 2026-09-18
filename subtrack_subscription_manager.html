@@ -124,6 +124,11 @@
                         <span>Subscriptions</span>
                     </button>
 
+                    <button onclick="switchTab('calendar')" data-nav-target="calendar" class="sidebar-nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                        <span>Calendar</span>
+                    </button>
+
                     <button onclick="switchTab('analytics')" data-nav-target="analytics" class="sidebar-nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                         <i data-lucide="pie-chart" class="w-4 h-4"></i>
                         <span>Analytics</span>
@@ -138,6 +143,21 @@
 
             <!-- Sidebar Footer Controls -->
             <div class="pt-4 border-t border-slate-200/80 dark:border-slate-800 space-y-3">
+                
+                <!-- Currency Selector -->
+                <div class="flex items-center justify-between px-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    <span class="flex items-center gap-1"><i data-lucide="coins" class="w-3.5 h-3.5"></i> Currency</span>
+                    <select id="currencySelectorDesktop" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-lg px-2 py-1 font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="JPY">JPY (¥)</option>
+                        <option value="PHP">PHP (₱)</option>
+                        <option value="CAD">CAD (CA$)</option>
+                        <option value="AUD">AUD (A$)</option>
+                    </select>
+                </div>
+
                 <button id="desktopAddBtnSidebar" class="w-full flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm transition shadow-md shadow-emerald-500/20 active:scale-95">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     <span>Add Subscription</span>
@@ -180,9 +200,18 @@
                 </div>
 
                 <div class="flex items-center space-x-2">
+                    <select id="currencySelectorMobile" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-2 py-1.5 font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="JPY">JPY (¥)</option>
+                        <option value="PHP">PHP (₱)</option>
+                        <option value="CAD">CAD (CA$)</option>
+                        <option value="AUD">AUD (A$)</option>
+                    </select>
+
                     <button onclick="switchTab('python')" class="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-800">
                         <i data-lucide="code-2" class="w-4 h-4"></i>
-                        <span>API</span>
                     </button>
                     <button id="darkToggleBtnMobile" aria-label="Toggle Dark Mode" class="p-2 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-xl">
                         <i data-lucide="moon" id="darkIconMobile" class="w-4 h-4"></i>
@@ -194,14 +223,17 @@
             <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
 
                 <!-- Mobile Header Quick View Navigation Tabs -->
-                <div class="flex lg:hidden bg-slate-200/60 dark:bg-slate-800 p-1 rounded-2xl text-xs font-bold border border-slate-200 dark:border-slate-700">
-                    <button onclick="switchTab('dashboard')" data-tab-btn="dashboard" class="mobile-top-tab flex-1 py-2 rounded-xl text-center bg-white dark:bg-navy-900 text-emerald-600 dark:text-emerald-400 shadow-sm transition">
+                <div class="flex lg:hidden bg-slate-200/60 dark:bg-slate-800 p-1 rounded-2xl text-xs font-bold border border-slate-200 dark:border-slate-700 overflow-x-auto">
+                    <button onclick="switchTab('dashboard')" data-tab-btn="dashboard" class="mobile-top-tab flex-1 py-2 px-2 min-w-[70px] rounded-xl text-center bg-white dark:bg-navy-900 text-emerald-600 dark:text-emerald-400 shadow-sm transition">
                         Dashboard
                     </button>
-                    <button onclick="switchTab('subscriptions')" data-tab-btn="subscriptions" class="mobile-top-tab flex-1 py-2 rounded-xl text-center text-slate-600 dark:text-slate-400 transition">
-                        Subscriptions (<span id="mobileTabCount">0</span>)
+                    <button onclick="switchTab('subscriptions')" data-tab-btn="subscriptions" class="mobile-top-tab flex-1 py-2 px-2 min-w-[70px] rounded-xl text-center text-slate-600 dark:text-slate-400 transition">
+                        Subs (<span id="mobileTabCount">0</span>)
                     </button>
-                    <button onclick="switchTab('analytics')" data-tab-btn="analytics" class="mobile-top-tab flex-1 py-2 rounded-xl text-center text-slate-600 dark:text-slate-400 transition">
+                    <button onclick="switchTab('calendar')" data-tab-btn="calendar" class="mobile-top-tab flex-1 py-2 px-2 min-w-[70px] rounded-xl text-center text-slate-600 dark:text-slate-400 transition">
+                        Calendar
+                    </button>
+                    <button onclick="switchTab('analytics')" data-tab-btn="analytics" class="mobile-top-tab flex-1 py-2 px-2 min-w-[70px] rounded-xl text-center text-slate-600 dark:text-slate-400 transition">
                         Analytics
                     </button>
                 </div>
@@ -288,7 +320,37 @@
                     </div>
                 </section>
 
-                <!-- Section 2: Analytics & Multi-Color Category Breakdown -->
+                <!-- Section 2: Calendar View -->
+                <section id="section-calendar" class="tab-section block space-y-4">
+                    <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <button id="calPrevMonth" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:text-emerald-500 transition">
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                </button>
+                                <h3 id="calendarMonthYearTitle" class="text-base sm:text-lg font-black text-navy-800 dark:text-white">Month Year</h3>
+                                <button id="calNextMonth" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:text-emerald-500 transition">
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <button id="calTodayBtn" class="px-3 py-1.5 text-xs font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl hover:bg-emerald-500 hover:text-white transition">
+                                Today
+                            </button>
+                        </div>
+
+                        <!-- Days Header -->
+                        <div class="grid grid-cols-7 text-center font-bold text-[11px] uppercase tracking-wider text-slate-400 mb-2">
+                            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                        </div>
+
+                        <!-- Calendar Grid -->
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2">
+                            <!-- Dynamically Generated Days -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3: Analytics & Multi-Color Category Breakdown -->
                 <section id="section-analytics" class="tab-section block space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                         
@@ -327,7 +389,7 @@
                     </div>
                 </section>
 
-                <!-- Section 3: Subscriptions Management List -->
+                <!-- Section 4: Subscriptions Management List -->
                 <section id="section-subscriptions" class="tab-section block space-y-4">
                     
                     <!-- Search & Filter Controls -->
@@ -424,7 +486,7 @@
     </button>
 
     <!-- Mobile Bottom Navigation Bar (< 1024px) -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-navy-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-6 py-2.5 flex justify-around items-center text-slate-500 dark:text-slate-400">
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-navy-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-4 py-2.5 flex justify-around items-center text-slate-500 dark:text-slate-400">
         <button onclick="switchTab('dashboard')" data-bnav-target="dashboard" class="mobile-bnav-item flex flex-col items-center space-y-1 text-emerald-500 font-bold">
             <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
             <span class="text-[10px]">Dashboard</span>
@@ -432,6 +494,10 @@
         <button onclick="switchTab('subscriptions')" data-bnav-target="subscriptions" class="mobile-bnav-item flex flex-col items-center space-y-1">
             <i data-lucide="receipt" class="w-5 h-5"></i>
             <span class="text-[10px]">Subs</span>
+        </button>
+        <button onclick="switchTab('calendar')" data-bnav-target="calendar" class="mobile-bnav-item flex flex-col items-center space-y-1">
+            <i data-lucide="calendar-days" class="w-5 h-5"></i>
+            <span class="text-[10px]">Calendar</span>
         </button>
         <button onclick="switchTab('analytics')" data-bnav-target="analytics" class="mobile-bnav-item flex flex-col items-center space-y-1">
             <i data-lucide="pie-chart" class="w-5 h-5"></i>
@@ -470,6 +536,18 @@
                     <input type="text" id="subName" required placeholder="e.g. Netflix, ChatGPT, Spotify, Gym" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100">
                 </div>
 
+                <!-- Free Trial Toggle -->
+                <div class="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Free Trial Service</p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Track cancellation countdown for temporary trials</p>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="subIsTrial" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
+                </div>
+
                 <!-- Category & Billing Cycle -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -499,7 +577,7 @@
                 <!-- Cost & Renewal Date -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Cost ($) *</label>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Cost *</label>
                         <input type="number" step="0.01" id="subCost" required placeholder="14.99" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 dark:text-slate-100">
                     </div>
 
@@ -595,6 +673,28 @@ def get_subtrack_list():
     </div>
 
     <script>
+        // Multi-Currency Mapping Configuration
+        const CURRENCIES = {
+            'USD': { symbol: '$', rate: 1.0 },
+            'EUR': { symbol: '€', rate: 0.92 },
+            'GBP': { symbol: '£', rate: 0.79 },
+            'JPY': { symbol: '¥', rate: 152.50 },
+            'PHP': { symbol: '₱', rate: 57.50 },
+            'CAD': { symbol: 'CA$', rate: 1.36 },
+            'AUD': { symbol: 'A$', rate: 1.52 }
+        };
+
+        let currentCurrency = 'USD';
+
+        function formatCurrency(amount) {
+            const curr = CURRENCIES[currentCurrency] || CURRENCIES['USD'];
+            const converted = amount * curr.rate;
+            if (currentCurrency === 'JPY') {
+                return `${curr.symbol}${Math.round(converted).toLocaleString()}`;
+            }
+            return `${curr.symbol}${converted.toFixed(2)}`;
+        }
+
         // Multi-Color Category Mapping
         const CATEGORY_COLORS = {
             'Entertainment': {
@@ -650,6 +750,7 @@ def get_subtrack_list():
                 nextDate: getRelativeDate(3),
                 paymentMethod: "Visa ...4242",
                 status: "Active",
+                isTrial: false,
                 notes: "4K UHD Family Account"
             },
             {
@@ -661,6 +762,7 @@ def get_subtrack_list():
                 nextDate: getRelativeDate(11),
                 paymentMethod: "Mastercard",
                 status: "Active",
+                isTrial: false,
                 notes: "AI Assistant"
             },
             {
@@ -672,18 +774,20 @@ def get_subtrack_list():
                 nextDate: getRelativeDate(1),
                 paymentMethod: "PayPal",
                 status: "Active",
+                isTrial: false,
                 notes: "Music streaming"
             },
             {
                 id: "sub-4",
-                name: "GitHub Copilot",
+                name: "Adobe CC Trial",
                 category: "Software/SaaS",
-                cycle: "Yearly",
-                cost: 100.00,
-                nextDate: getRelativeDate(42),
+                cycle: "Monthly",
+                cost: 54.99,
+                nextDate: getRelativeDate(2),
                 paymentMethod: "Visa",
                 status: "Active",
-                notes: "AI Code completion"
+                isTrial: true,
+                notes: "7-Day Promotional Trial"
             },
             {
                 id: "sub-5",
@@ -694,6 +798,7 @@ def get_subtrack_list():
                 nextDate: getRelativeDate(16),
                 paymentMethod: "Debit Card",
                 status: "Paused",
+                isTrial: false,
                 notes: "Fitness club access"
             },
             {
@@ -705,6 +810,7 @@ def get_subtrack_list():
                 nextDate: getRelativeDate(22),
                 paymentMethod: "Apple Pay",
                 status: "Active",
+                isTrial: false,
                 notes: "200GB Backup"
             }
         ];
@@ -718,18 +824,28 @@ def get_subtrack_list():
         let subscriptions = [];
         let categoryChartInstance = null;
         let monthlyChartInstance = null;
+        let calendarDate = new Date();
 
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
             initCharts();
             renderApp();
             setupEvents();
-            switchTab('dashboard'); // Explicit default navigation call
+            switchTab('dashboard');
             lucide.createIcons();
         });
 
         function loadData() {
             const stored = localStorage.getItem('subtrack_data');
+            const storedCurrency = localStorage.getItem('subtrack_currency');
+            if (storedCurrency && CURRENCIES[storedCurrency]) {
+                currentCurrency = storedCurrency;
+                const selDesktop = document.getElementById('currencySelectorDesktop');
+                const selMobile = document.getElementById('currencySelectorMobile');
+                if (selDesktop) selDesktop.value = currentCurrency;
+                if (selMobile) selMobile.value = currentCurrency;
+            }
+
             if (stored) {
                 try {
                     subscriptions = JSON.parse(stored);
@@ -743,6 +859,7 @@ def get_subtrack_list():
 
         function saveData() {
             localStorage.setItem('subtrack_data', JSON.stringify(subscriptions));
+            localStorage.setItem('subtrack_currency', currentCurrency);
         }
 
         function showToast(msg) {
@@ -790,7 +907,7 @@ def get_subtrack_list():
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return ` ${context.label}: $${context.raw.toFixed(2)}/mo`;
+                                        return ` ${context.label}: ${formatCurrency(context.raw)}/mo`;
                                     }
                                 }
                             }
@@ -807,7 +924,7 @@ def get_subtrack_list():
                     data: {
                         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                         datasets: [{
-                            label: 'Monthly Cost ($)',
+                            label: 'Monthly Cost',
                             data: [0, 0, 0, 0, 0, 0],
                             backgroundColor: '#10b981',
                             borderRadius: 8
@@ -817,14 +934,21 @@ def get_subtrack_list():
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { display: false }
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` Total: ${formatCurrency(context.raw)}`;
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' },
                                 ticks: {
-                                    callback: function(val) { return '$' + val; }
+                                    callback: function(val) { return formatCurrency(val); }
                                 }
                             },
                             x: {
@@ -878,7 +1002,7 @@ def get_subtrack_list():
                                     <span class="font-medium text-slate-700 dark:text-slate-300 truncate">${escapeHtml(cat)}</span>
                                 </div>
                                 <div class="font-bold text-right shrink-0 ml-2">
-                                    <span>$${amt.toFixed(2)}</span>
+                                    <span>${formatCurrency(amt)}</span>
                                     <span class="text-[10px] text-slate-400 ml-1">(${pct}%)</span>
                                 </div>
                             </div>
@@ -902,6 +1026,56 @@ def get_subtrack_list():
                 monthlyChartInstance.data.datasets[0].data = monthTotals;
                 monthlyChartInstance.update();
             }
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const title = document.getElementById('calendarMonthYearTitle');
+            if (!grid || !title) return;
+
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+
+            title.textContent = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            let html = '';
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="h-16 sm:h-20 bg-slate-50/50 dark:bg-navy-950/30 rounded-xl"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = dateStr === todayStr;
+
+                const daySubs = subscriptions.filter(s => s.status === 'Active' && s.nextDate === dateStr);
+
+                html += `
+                    <div class="h-16 sm:h-20 p-1 sm:p-2 border border-slate-100 dark:border-slate-800 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 flex flex-col justify-between ${isToday ? 'ring-2 ring-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20' : ''}">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold ${isToday ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'}">${day}</span>
+                            ${daySubs.length > 0 ? `<span class="w-2 h-2 rounded-full bg-emerald-500"></span>` : ''}
+                        </div>
+                        <div class="overflow-y-auto space-y-1 max-h-10">
+                            ${daySubs.map(s => {
+                                const catStyle = CATEGORY_COLORS[s.category] || CATEGORY_COLORS['Other'];
+                                return `
+                                    <div title="${escapeHtml(s.name)} - ${formatCurrency(s.cost)}" class="text-[9px] font-bold px-1 py-0.5 rounded truncate text-white" style="background-color: ${catStyle.hex}">
+                                        ${escapeHtml(s.name)}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            grid.innerHTML = html;
         }
 
         function renderApp() {
@@ -928,10 +1102,10 @@ def get_subtrack_list():
             });
 
             const statMonthly = document.getElementById('statMonthlyTotal');
-            if (statMonthly) statMonthly.textContent = `$${monthlyTotal.toFixed(2)}`;
+            if (statMonthly) statMonthly.textContent = formatCurrency(monthlyTotal);
 
             const statAnnual = document.getElementById('statAnnualTotal');
-            if (statAnnual) statAnnual.textContent = `$${(monthlyTotal * 12).toFixed(2)}`;
+            if (statAnnual) statAnnual.textContent = formatCurrency(monthlyTotal * 12);
 
             const statActive = document.getElementById('statActiveCount');
             if (statActive) statActive.textContent = activeCount;
@@ -947,7 +1121,7 @@ def get_subtrack_list():
             if (statNextName && statNextDetail) {
                 if (nextRenewalSub) {
                     statNextName.textContent = nextRenewalSub.name;
-                    statNextDetail.textContent = `$${parseFloat(nextRenewalSub.cost).toFixed(2)} on ${nextRenewalSub.nextDate}`;
+                    statNextDetail.textContent = `${formatCurrency(parseFloat(nextRenewalSub.cost))} on ${nextRenewalSub.nextDate}`;
                 } else {
                     statNextName.textContent = 'None';
                     statNextDetail.textContent = 'No upcoming bills';
@@ -965,7 +1139,7 @@ def get_subtrack_list():
 
                 if (urgentSubs.length > 0) {
                     urgentBanner.classList.remove('hidden');
-                    urgentText.textContent = `${urgentSubs.map(s => s.name).join(', ')} renewing within the next 3 days!`;
+                    urgentText.textContent = `${urgentSubs.map(s => s.name + (s.isTrial ? ' (Trial)' : '')).join(', ')} renewing within the next 3 days!`;
                 } else {
                     urgentBanner.classList.add('hidden');
                 }
@@ -1012,7 +1186,10 @@ def get_subtrack_list():
                         return `
                             <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                                 <td class="px-5 py-3.5 font-bold text-navy-800 dark:text-slate-100">
-                                    ${escapeHtml(sub.name)}
+                                    <div class="flex items-center space-x-2">
+                                        <span>${escapeHtml(sub.name)}</span>
+                                        ${sub.isTrial ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300">Trial</span>` : ''}
+                                    </div>
                                     ${sub.notes ? `<p class="text-[10px] font-normal text-slate-400 truncate max-w-xs">${escapeHtml(sub.notes)}</p>` : ''}
                                 </td>
                                 <td class="px-5 py-3.5">
@@ -1021,7 +1198,7 @@ def get_subtrack_list():
                                     </span>
                                 </td>
                                 <td class="px-5 py-3.5 font-extrabold text-slate-800 dark:text-slate-200">
-                                    $${parseFloat(sub.cost).toFixed(2)} <span class="text-[10px] font-normal text-slate-400">/ ${sub.cycle}</span>
+                                    ${formatCurrency(parseFloat(sub.cost))} <span class="text-[10px] font-normal text-slate-400">/ ${sub.cycle}</span>
                                 </td>
                                 <td class="px-5 py-3.5 font-medium text-slate-600 dark:text-slate-300">
                                     ${sub.nextDate || 'N/A'}
@@ -1056,7 +1233,10 @@ def get_subtrack_list():
                             <div class="bg-white dark:bg-navy-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
                                 <div class="flex items-start justify-between">
                                     <div>
-                                        <h4 class="font-extrabold text-sm text-navy-800 dark:text-white">${escapeHtml(sub.name)}</h4>
+                                        <div class="flex items-center space-x-2">
+                                            <h4 class="font-extrabold text-sm text-navy-800 dark:text-white">${escapeHtml(sub.name)}</h4>
+                                            ${sub.isTrial ? `<span class="px-1.5 py-0.5 rounded-full text-[8px] font-extrabold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300">Trial</span>` : ''}
+                                        </div>
                                         <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${catStyle.bgLight} ${catStyle.bgDark}">
                                             ${escapeHtml(sub.category)}
                                         </span>
@@ -1069,7 +1249,7 @@ def get_subtrack_list():
                                 <div class="flex items-baseline justify-between pt-1 border-t border-slate-100 dark:border-slate-800">
                                     <div>
                                         <span class="text-xs text-slate-400">Cost: </span>
-                                        <span class="text-sm font-black text-slate-800 dark:text-slate-100">$${parseFloat(sub.cost).toFixed(2)}</span>
+                                        <span class="text-sm font-black text-slate-800 dark:text-slate-100">${formatCurrency(parseFloat(sub.cost))}</span>
                                         <span class="text-[10px] text-slate-400">/${sub.cycle}</span>
                                     </div>
                                     <div class="text-right">
@@ -1094,6 +1274,7 @@ def get_subtrack_list():
                 }
             }
 
+            renderCalendar();
             updateCharts();
             if (window.lucide) lucide.createIcons();
         }
@@ -1107,6 +1288,7 @@ def get_subtrack_list():
             const sections = {
                 'dashboard': document.getElementById('section-dashboard'),
                 'subscriptions': document.getElementById('section-subscriptions'),
+                'calendar': document.getElementById('section-calendar'),
                 'analytics': document.getElementById('section-analytics')
             };
 
@@ -1144,9 +1326,9 @@ def get_subtrack_list():
             mobileTopBtns.forEach(btn => {
                 const target = btn.getAttribute('data-tab-btn');
                 if (target === tabName) {
-                    btn.className = "mobile-top-tab flex-1 py-2 rounded-xl text-center bg-white dark:bg-navy-900 text-emerald-600 dark:text-emerald-400 shadow-sm transition font-bold";
+                    btn.className = "mobile-top-tab flex-1 py-2 px-2 min-w-[70px] rounded-xl text-center bg-white dark:bg-navy-900 text-emerald-600 dark:text-emerald-400 shadow-sm transition font-bold";
                 } else {
-                    btn.className = "mobile-top-tab flex-1 py-2 rounded-xl text-center text-slate-600 dark:text-slate-400 transition font-normal";
+                    btn.className = "mobile-top-tab flex-1 py-2 px-2 min-w-[70px] rounded-xl text-center text-slate-600 dark:text-slate-400 transition font-normal";
                 }
             });
 
@@ -1171,7 +1353,7 @@ def get_subtrack_list():
 
         window.addEventListener('resize', () => {
             const isMobile = window.innerWidth < 1024;
-            const sections = ['section-dashboard', 'section-subscriptions', 'section-analytics'];
+            const sections = ['section-dashboard', 'section-subscriptions', 'section-calendar', 'section-analytics'];
             sections.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -1188,12 +1370,40 @@ def get_subtrack_list():
             document.getElementById('darkToggleBtnDesktop')?.addEventListener('click', toggleDark);
             document.getElementById('darkToggleBtnMobile')?.addEventListener('click', toggleDark);
 
+            const onCurrencyChange = (e) => {
+                currentCurrency = e.target.value;
+                const selDesktop = document.getElementById('currencySelectorDesktop');
+                const selMobile = document.getElementById('currencySelectorMobile');
+                if (selDesktop) selDesktop.value = currentCurrency;
+                if (selMobile) selMobile.value = currentCurrency;
+                saveData();
+                renderApp();
+            };
+
+            document.getElementById('currencySelectorDesktop')?.addEventListener('change', onCurrencyChange);
+            document.getElementById('currencySelectorMobile')?.addEventListener('change', onCurrencyChange);
+
             document.getElementById('searchInput')?.addEventListener('input', renderApp);
             document.getElementById('categoryFilter')?.addEventListener('change', renderApp);
             document.getElementById('sortFilter')?.addEventListener('change', renderApp);
 
             document.getElementById('closeBannerBtn')?.addEventListener('click', () => {
                 document.getElementById('urgentRenewalBanner')?.classList.add('hidden');
+            });
+
+            document.getElementById('calPrevMonth')?.addEventListener('click', () => {
+                calendarDate.setMonth(calendarDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            document.getElementById('calNextMonth')?.addEventListener('click', () => {
+                calendarDate.setMonth(calendarDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            document.getElementById('calTodayBtn')?.addEventListener('click', () => {
+                calendarDate = new Date();
+                renderCalendar();
             });
 
             document.getElementById('desktopAddBtnSidebar')?.addEventListener('click', openAddModal);
@@ -1224,6 +1434,7 @@ def get_subtrack_list():
             document.getElementById('modalTitle').textContent = 'Add Subscription';
             document.getElementById('subForm').reset();
             document.getElementById('subId').value = '';
+            document.getElementById('subIsTrial').checked = false;
             document.getElementById('subNextDate').value = getRelativeDate(30);
             document.getElementById('subModal').classList.remove('hidden');
             document.body.classList.add('modal-open');
@@ -1236,6 +1447,7 @@ def get_subtrack_list():
             document.getElementById('modalTitle').textContent = 'Edit Subscription';
             document.getElementById('subId').value = sub.id;
             document.getElementById('subName').value = sub.name;
+            document.getElementById('subIsTrial').checked = !!sub.isTrial;
             document.getElementById('subCategory').value = sub.category;
             document.getElementById('subCycle').value = sub.cycle;
             document.getElementById('subCost').value = sub.cost;
@@ -1269,6 +1481,7 @@ def get_subtrack_list():
             const newSub = {
                 id: id || 'sub-' + Date.now(),
                 name: document.getElementById('subName').value,
+                isTrial: document.getElementById('subIsTrial').checked,
                 category: document.getElementById('subCategory').value,
                 cycle: document.getElementById('subCycle').value,
                 cost: parseFloat(document.getElementById('subCost').value),
